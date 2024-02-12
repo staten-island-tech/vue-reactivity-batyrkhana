@@ -6,11 +6,15 @@ import { RouterLink, RouterView } from 'vue-router'
 <template>
   <header>
     <div class="wrapper">
-      <div class="announcement">Welcome to my Game! Your job is to find all of the corrupt politicians and send them to prison! You will be tasked with finding finding evidence to support the prosecution against the politicians. Collect the evidence to restore fair rule.</div>
+      <h1 class="mainTitle">Asset Confiscator Software</h1>
     </div>
   </header>
-
-  <RouterView />
+  <div class="view">
+    <RouterView />
+  </div>
+  
 </template>
 
-<style scoped></style>
+<style>
+  
+</style>

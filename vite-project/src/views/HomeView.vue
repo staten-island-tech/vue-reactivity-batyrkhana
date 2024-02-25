@@ -1,56 +1,90 @@
 <template>
   <div class="main-page">
-    <h1>Prominent RF Political / Business Figures:</h1>
-    <div class="cardPolit">
-      <div v-for="(disgrace, index) in wealthyRussians" :key="index" class="person">
-        <div class="disgraceImgContainer">
-          <img class="corrupt" :src="disgrace.img" :alt="disgrace.name">
-        </div>
-        <div class="infoPolit">
-          <h2>{{ disgrace.name }}</h2>
-          <p> {{ disgrace.type }}</p>
-          <p v-if="disgrace.networth === undefined">Asset Value: Unknown</p>
-          <p v-else>Asset Value: ${{ disgrace.networth }}</p>
-          <button @click="confiscateAssets(disgrace)">Confiscate Assets</button>
+    <div class="primary-information">
+      <h1>Prominent RF Political / Business Figures:</h1>
+      <div class="CreatedPoliticianCard">
+        <div v-for="(Politician, index) in wealthyRussians" :key="index" class="PoliticianData">
+          <div class="CreatedPoliticianCardImgContainer">
+            <img class="PoliticianImg" :src="Politician.img" :alt="Politician.name">
+          </div>
+          <div class="CreatedPoliticianCardInfoContainer">
+            <h2>{{ Politician.name }}</h2>
+            <p> {{ Politician.type }}</p>
+            <p v-if="Politician.networth === undefined">Asset Value: Unknown</p>
+            <p v-else>Asset Value: ${{ Politician.networth }}</p>
+            <button @click="confiscateAssets(Politician)">Confiscate Assets</button>
+          </div>
         </div>
       </div>
+    </div>
+    <div class="checkout">
+    <p>Total Confiscated: {{ formattedConfiscatedAmount }}</p>
+    ... other checkout elements ...
     </div>
   </div>
 </template>
 
 <script>
-import { rusPolitArr } from '@/stores/wealthyRussians.js'; 
+import { ArrayOfRussianCorruptPoliticians } from '@/stores/wealthyRussians.js'; 
 
 export default {
   data() {
     return {
-      wealthyRussians: rusPolitArr
+      wealthyRussians: ArrayOfRussianCorruptPoliticians,
+      confiscatedAmount: 0,
     };
   },
   methods: {
     confiscateAssets(politician) {
-      if (politician.networth !== undefined) {
+      console.log('Stage 1 complete')
+      if (politician.networth > 0) {
+        this.confiscatedAmount += politician.networth;
         politician.networth = 0;
+        this.playConfiscateSound(); // Play the sound after confiscation
       }
-    }
-  }
+    },
+    playConfiscateSound() {
+      console.log('stage 2 complete')
+      const audio = new Audio("vite-project/src/assets/mp3files/boowomp.mp3"); // Replace with actual path
+      audio.play();
+    },
+  },
+  computed: {
+    formattedConfiscatedAmount() {
+      // Convert amount to billions
+      const billions = this.confiscatedAmount / 1e9;
+      // Format with currency symbol and two decimal places
+      return `$${billions.toFixed(2)} Billion`;
+    },
+  },
 };
 </script>
 
 <style scoped>
 .main-page {
-  max-width: 80rem;
+  display: flex;
+}
+.primary-information {
+  width: 70vw;
+}
+.checkout {
+  width: 30vw;
+  margin: 1rem;
+  padding: 2rem;
+}
+.main-page {
+  max-width: 100%;
   margin: 0 auto;
   padding: 2rem;
 }
 
-.cardPolit {
+.CreatedPoliticianCard {
   display: flex;
   flex-wrap:wrap;
   gap: 2rem;
 }
 
-.person {
+.PoliticianData {
   border-radius: .7rem;
   overflow: hidden;
   flex: 1 1 20rem;
@@ -58,17 +92,17 @@ export default {
   border-color: #234234;
 }
 
-.disgraceImgContainer {
-  height: 13rem;
+.CreatedPoliticianCardImgContainer {
+  height: 16rem;
   overflow: hidden;
 }
 
-.corrupt {
+.PoliticianImg {
   width: 100%;
   height: auto;
 }
 
-.infoPolit {
+.CreatedPoliticianCardInfoContainer {
   padding: 2rem;
   color: black;
 }

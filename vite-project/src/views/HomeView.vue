@@ -1,59 +1,92 @@
 <template>
   <div class="main-page">
     <div class="primary-information">
-      <h1>Prominent RF Political / Business Figures:</h1>
+      <h1 class="politicians-heading">Prominent RF Political / Business Figures:</h1>
       <div class="CreatedPoliticianCard">
-        <div v-for="(Politician, index) in wealthyRussians" :key="index" class="PoliticianData">
+        <div v-for="(russianScumbag, index) in wealthyRussians" :key="index" class="PoliticianData">
           <div class="CreatedPoliticianCardImgContainer">
-            <img class="PoliticianImg" :src="Politician.img" :alt="Politician.name">
+            <img class="PoliticianImg" :src="russianScumbag.img" :alt="russianScumbag.name">
           </div>
           <div class="CreatedPoliticianCardInfoContainer">
-            <h2>{{ Politician.name }}</h2>
-            <p> {{ Politician.type }}</p>
-            <p v-if="Politician.networth === undefined">Asset Value: Unknown</p>
-            <p v-else>Asset Value: ${{ Politician.networth }}</p>
-            <button @click="confiscateAssets(Politician)">Confiscate Assets</button>
+            <h2>{{ russianScumbag.name }}</h2>
+            <p> {{ russianScumbag.type }}</p>
+            <p>Rich Guy's Worth: {{ russianScumbag.riches ? `$${twoPlaceDeciChanger(russianScumbag.riches)}` : 'Man\'s a Brokie' }}</p> 
+            <button @click="russianScumbag.confiscated ? returnAssets(russianScumbag) : confiscateAssets(russianScumbag)">{{ russianScumbag.confiscated ? 'Return Confiscated Assets' : 'Confiscate Russian Assets' }}</button>
           </div>
         </div>
       </div>
     </div>
-    <div class="checkout">
-    <p>Total Confiscated: {{ formattedConfiscatedAmount }}</p>
-    ... other checkout elements ...
+    <div class="ConfiscatedAssetsCard">
+      <h1>Seized Property / Funds / Stocks</h1>
+      <div v-if="politicianConfiscatedAssetsList.length === 0">Get to work, can't be letting these corrupt Russian businessmen and politicians take over the world! Too much time wasted don't you think?!</div>
+      <div v-else>
+        <div v-for="(item, index) in politicianConfiscatedAssetsList" :key="index">
+          <p>{{ item.name }} - ${{ twoPlaceDeciChanger(item.riches) }}</p>
+          <button @click="removeFrompoliticianConfiscatedAssetsList(index)">Remove</button>
+        </div>
+        <p>Seized: {{ formattedConfiscatedAmount }}</p>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 import { ArrayOfRussianCorruptPoliticians } from '@/stores/wealthyRussians.js'; 
-
 export default {
   data() {
     return {
       wealthyRussians: ArrayOfRussianCorruptPoliticians,
+      politicianConfiscatedAssetsList: [],
       confiscatedAmount: 0,
     };
   },
   methods: {
-    confiscateAssets(politician) {
-      console.log('Stage 1 complete')
-      if (politician.networth > 0) {
-        this.confiscatedAmount += politician.networth;
-        politician.networth = 0;
-        this.playConfiscateSound(); // Play the sound after confiscation
+    confiscateAssets(russianScumbag) {
+      if (russianScumbag.riches > 0 && !russianScumbag.confiscated) {
+        this.confiscatedAmount += russianScumbag.riches;
+        this.politicianConfiscatedAssetsList.push({ name: russianScumbag.name, riches: russianScumbag.riches });
+        russianScumbag.confiscated = true;
+        russianScumbag.originalNetworth = russianScumbag.riches;
+        russianScumbag.riches = 0;
+        this.playConfiscateSound();
+      }
+    },
+    returnAssets(russianScumbag) {
+      const index = this.politicianConfiscatedAssetsList.findIndex(item => item.name === russianScumbag.name);
+      if (index !== -1) {
+        this.confiscatedAmount -= this.politicianConfiscatedAssetsList[index].riches;
+        this.politicianConfiscatedAssetsList.splice(index, 1);
+        russianScumbag.riches = russianScumbag.originalNetworth;
+        russianScumbag.confiscated = false;
       }
     },
     playConfiscateSound() {
-      console.log('stage 2 complete')
-      const audio = new Audio("vite-project/src/assets/mp3files/boowomp.mp3"); // Replace with actual path
-      audio.play();
+      const sound = new Howler.Howl({
+        src: "vite-project/public/mp3files/boowomp.mp3", 
+      });
+      sound.play();
+    },
+    twoPlaceDeciChanger(value) {
+      return new Intl.NumberFormat('en-US', { 
+        style: 'decimal', 
+        minimumFractionDigits: 2, 
+        maximumFractionDigits: 2 
+      }).format(value);
+    },
+    removeFrompoliticianConfiscatedAssetsList(index) {
+      const item = this.politicianConfiscatedAssetsList[index];
+      this.confiscatedAmount -= item.riches;
+      const russianScumbag = this.wealthyRussians.find(russianScumbag => russianScumbag.name === item.name);
+      if (russianScumbag) {
+        russianScumbag.riches = russianScumbag.originalNetworth;
+        russianScumbag.confiscated = false;
+      }
+      this.politicianConfiscatedAssetsList.splice(index, 1);
     },
   },
   computed: {
     formattedConfiscatedAmount() {
-      // Convert amount to billions
       const billions = this.confiscatedAmount / 1e9;
-      // Format with currency symbol and two decimal places
       return `$${billions.toFixed(2)} Billion`;
     },
   },
@@ -61,21 +94,19 @@ export default {
 </script>
 
 <style scoped>
+
 .main-page {
   display: flex;
 }
 .primary-information {
-  width: 70vw;
+  width: 60vw;
 }
-.checkout {
-  width: 30vw;
+.ConfiscatedAssetsCard {
+  width: 20vw;
   margin: 1rem;
-  padding: 2rem;
-}
-.main-page {
-  max-width: 100%;
-  margin: 0 auto;
-  padding: 2rem;
+  padding: 1rem;
+  border-color: red;
+  border-width: 20px;
 }
 
 .CreatedPoliticianCard {
@@ -86,6 +117,7 @@ export default {
 
 .PoliticianData {
   border-radius: .7rem;
+  border-color: red;
   overflow: hidden;
   flex: 1 1 20rem;
   max-width: 25rem;

@@ -16,5 +16,8 @@ import { RouterLink, RouterView } from 'vue-router'
 </template>
 
 <style>
-
+  .mainTitle {
+    padding: 2rem;
+    margin: 1rem;
+  }
 </style>

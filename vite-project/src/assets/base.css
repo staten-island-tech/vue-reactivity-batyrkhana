@@ -4,3 +4,30 @@ html,body,*{
   box-sizing: border-box;
   font-size: 62.5%;
 }
+:root {
+  --light-blue: #2998ff;
+  --light: #f4f4f4;
+  --dark: #1c1c1c;
+  --green: #469f4f;
+  --sandy: #fffecc;
+  --golden: goldenrod;
+  --blood: rgb(235, 84, 84);
+  --yellow: yellow;
+  --pink: pink;
+  
+  /*Typography*/
+  --h1: 7.594rem;
+  --h2: 5.063rem;
+  --h3: 3.375rem;
+  --h4: 2.250rem;
+  --h5: 1.850rem;
+  --h6: 1.500rem;
+  --h7: 1.250rem;
+  
+  /*Intentions*/
+  --primary: var(--light);
+  --secondary: var(--dark);
+  --tertiary: var(--green);
+  --quarternary: var(--pink);
+  --quinary: var(--blood);
+}

@@ -10,149 +10,189 @@
           <div class="CreatedPoliticianCardInfoContainer">
             <h2>{{ russianScumbag.name }}</h2>
             <p> {{ russianScumbag.type }}</p>
-            <p>Rich Guy's Worth: {{ russianScumbag.riches ? `$${twoPlaceDeciChanger(russianScumbag.riches)}` : 'Man\'s a Brokie' }}</p> 
-            <button @click="russianScumbag.confiscated ? returnAssets(russianScumbag) : confiscateAssets(russianScumbag)">{{ russianScumbag.confiscated ? 'Return Confiscated Assets' : 'Confiscate Russian Assets' }}</button>
+            <p class="networthPolitician">Rich Guy's Worth: {{ russianScumbag.riches ? `$${twoPlaceDeciChanger(russianScumbag.riches)}` : 'Man\'s a Brokie' }}</p> 
+            <button class="confiscatorBtn" @click="toggleAssetsConfiscation(russianScumbag)">{{ russianScumbag.confiscated ? 'Return Confiscated Assets' : 'Confiscate Russian Assets' }}</button>
           </div>
         </div>
       </div>
     </div>
     <div class="ConfiscatedAssetsCard">
-      <h1>Seized Property / Funds / Stocks</h1>
-      <div v-if="politicianConfiscatedAssetsList.length === 0">Get to work, can't be letting these corrupt Russian businessmen and politicians take over the world! Too much time wasted don't you think?!</div>
-      <div v-else>
-        <div v-for="(item, index) in politicianConfiscatedAssetsList" :key="index">
-          <p>{{ item.name }} - ${{ twoPlaceDeciChanger(item.riches) }}</p>
-          <button @click="removeFrompoliticianConfiscatedAssetsList(index)">Remove</button>
+      <div class="orangeBgCheckout">
+        <h2 class="ConfiscatedAssetsCardTitle">Total Amount of Money Taken Away:</h2>
+        <div class="nothingConfiscatedYet" v-if="confiscatedAssets.length === 0">No assets confiscated yet.</div>
+        <div class="somethingConfiscated" v-else>
+          <div v-for="(asset, index) in confiscatedAssets" :key="index">
+            <p class="somethingConfiscatedNames">{{ asset.name }} - ${{ twoPlaceDeciChanger(asset.riches) }}</p>
+            <button class="somethingConfiscatedMainReturnBtn" @click="returnConfiscatedAsset(index)">Return</button>
+          </div>
+          <p class="somethingConfiscatedTotalAmnt">Total Confiscated Amount: {{ formattedConfiscatedAmount }}</p>
         </div>
-        <p>Seized: {{ formattedConfiscatedAmount }}</p>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import { ref, computed } from 'vue';
 import { ArrayOfRussianCorruptPoliticians } from '@/stores/wealthyRussians.js'; 
+
 export default {
-  data() {
-    return {
-      wealthyRussians: ArrayOfRussianCorruptPoliticians,
-      politicianConfiscatedAssetsList: [],
-      confiscatedAmount: 0,
-    };
-  },
-  methods: {
-    confiscateAssets(russianScumbag) {
-      if (russianScumbag.riches > 0 && !russianScumbag.confiscated) {
-        this.confiscatedAmount += russianScumbag.riches;
-        this.politicianConfiscatedAssetsList.push({ name: russianScumbag.name, riches: russianScumbag.riches });
+  setup() {
+    const wealthyRussians = ref(ArrayOfRussianCorruptPoliticians);
+    const confiscatedAssets = ref([]);
+    const confiscatedAmount = ref(0);
+
+    const toggleAssetsConfiscation = (russianScumbag) => {
+      if (russianScumbag.riches > 0 && !russianScumbag.confiscated) { //If the value of assets is greater than 0 and assets have not been confiscated:
         russianScumbag.confiscated = true;
-        russianScumbag.originalNetworth = russianScumbag.riches;
+        confiscatedAmount.value += russianScumbag.riches;
+        confiscatedAssets.value.push({ name: russianScumbag.name, riches: russianScumbag.riches });
+        // Set the rich guy's worth to 0 when assets are confiscated
+        russianScumbag.originalRiches = russianScumbag.riches;
         russianScumbag.riches = 0;
-        this.playConfiscateSound();
-      }
-    },
-    returnAssets(russianScumbag) {
-      const index = this.politicianConfiscatedAssetsList.findIndex(item => item.name === russianScumbag.name);
-      if (index !== -1) {
-        this.confiscatedAmount -= this.politicianConfiscatedAssetsList[index].riches;
-        this.politicianConfiscatedAssetsList.splice(index, 1);
-        russianScumbag.riches = russianScumbag.originalNetworth;
+      } else if (russianScumbag.confiscated) {
         russianScumbag.confiscated = false;
+        const index = confiscatedAssets.value.findIndex(asset => asset.name === russianScumbag.name);
+        if (index !== -1) {
+          confiscatedAmount.value -= confiscatedAssets.value[index].riches;
+          confiscatedAssets.value.splice(index, 1);
+          // Reset the rich guy's worth to the original amount when assets are returned
+          russianScumbag.riches = russianScumbag.originalRiches;
+        }
       }
-    },
-    playConfiscateSound() {
-      const sound = new Howler.Howl({
-        src: "vite-project/public/mp3files/boowomp.mp3", 
-      });
-      sound.play();
-    },
-    twoPlaceDeciChanger(value) {
+    };
+
+    const returnConfiscatedAsset = (index) => {
+      confiscatedAmount.value -= confiscatedAssets.value[index].riches;
+      const russianScumbag = wealthyRussians.value.find(russianScumbag => russianScumbag.name === confiscatedAssets.value[index].name);
+      if (russianScumbag) {
+        russianScumbag.confiscated = false;
+        // Reset the rich guy's worth to the original amount when assets are returned
+        russianScumbag.riches = russianScumbag.originalRiches;
+      }
+      confiscatedAssets.value.splice(index, 1);
+    };
+
+    const formattedConfiscatedAmount = computed(() => {
+      const billions = confiscatedAmount.value / 1e9;
+      return `$${billions.toFixed(2)} Billion`;
+    });
+
+    const twoPlaceDeciChanger = (value) => {
       return new Intl.NumberFormat('en-US', { 
         style: 'decimal', 
         minimumFractionDigits: 2, 
         maximumFractionDigits: 2 
       }).format(value);
-    },
-    removeFrompoliticianConfiscatedAssetsList(index) {
-      const item = this.politicianConfiscatedAssetsList[index];
-      this.confiscatedAmount -= item.riches;
-      const russianScumbag = this.wealthyRussians.find(russianScumbag => russianScumbag.name === item.name);
-      if (russianScumbag) {
-        russianScumbag.riches = russianScumbag.originalNetworth;
-        russianScumbag.confiscated = false;
-      }
-      this.politicianConfiscatedAssetsList.splice(index, 1);
-    },
-  },
-  computed: {
-    formattedConfiscatedAmount() {
-      const billions = this.confiscatedAmount / 1e9;
-      return `$${billions.toFixed(2)} Billion`;
-    },
-  },
+    };
+
+    return { wealthyRussians, confiscatedAssets, toggleAssetsConfiscation, returnConfiscatedAsset, formattedConfiscatedAmount, twoPlaceDeciChanger };
+  }
 };
 </script>
 
 <style scoped>
-
-.main-page {
-  display: flex;
-}
-.primary-information {
-  width: 60vw;
-}
-.ConfiscatedAssetsCard {
-  width: 20vw;
-  margin: 1rem;
-  padding: 1rem;
-  border-color: red;
-  border-width: 20px;
-}
-
-.CreatedPoliticianCard {
-  display: flex;
-  flex-wrap:wrap;
-  gap: 2rem;
-}
-
-.PoliticianData {
-  border-radius: .7rem;
-  border-color: red;
-  overflow: hidden;
-  flex: 1 1 20rem;
-  max-width: 25rem;
-  border-color: #234234;
-}
-
-.CreatedPoliticianCardImgContainer {
-  height: 16rem;
-  overflow: hidden;
-}
-
-.PoliticianImg {
-  width: 100%;
-  height: auto;
-}
-
-.CreatedPoliticianCardInfoContainer {
-  padding: 2rem;
-  color: black;
-}
-
-button {
-  color: #fff;
-  border: none;
-  margin-top: .5rem;
-  padding: .4rem 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-button:hover {
-  background-color: #ff8000;
-}
-h1{
-  margin: 1rem;
-}
+  .somethingConfiscatedTotalAmnt{
+    margin-top: 2rem;
+    font-size: var(--h5);
+  }
+  .somethingConfiscatedNames{
+    font-size: var(--h4);
+  }
+  .orangeBgCheckout{
+    background-color: orange;
+    padding: 1rem;
+    width: 59rem;
+    margin: 1.5rem;
+  }
+  .ConfiscatedAssetsCardTitle {
+    padding: 2rem;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: var(--h2);
+  }
+  .nothingConfiscatedYet {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: var(--h3);
+    margin-left: 2rem;
+    margin-right: 2rem;
+  }
+  .somethingConfiscated{
+    font-family: 'Courier New', Courier, monospace;
+    font-size: var(--h4);
+    margin-left: 2rem;
+    margin-right: 2rem;
+  }
+  .ConfiscatedAssetsCard {
+    background-color: beige;
+    width: 61.6rem;
+  }
+  .confiscatorBtn {
+    background-color: black;
+    border-color: white;
+    color: azure;
+    width: 20rem;
+    height: 3rem;
+    border: 0rem;
+    border-radius: .2rem;
+    margin-top: 1rem;
+  }
+  .somethingConfiscatedMainReturnBtn {
+    background-color: black;
+    border-color: white;
+    color: azure;
+    width: 15rem;
+    text-align: calc(100% - 1rem);
+    font-size: var(--h5);
+    border-radius: .2rem;
+    margin-top: 1rem;
+  }
+  .main-page {
+    display: flex;
+  }
+  .primary-information {
+    width: 110rem;
+  }
+  .politicians-heading {
+    background-color: beige;
+    font-size: var(--h2);
+    font-family: "Ojuju", sans-serif;
+    font-optical-sizing: auto;
+    font-style: bold;
+    padding-top: 0rem;
+    padding-left: 2rem;
+    padding-right: 0rem;
+    padding-bottom: 0.5rem;
+  }
+  .CreatedPoliticianCard {
+    display: flex; 
+    grid-column: 2;
+    padding: 1rem;
+    margin: 1rem;
+    background-color: beige;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+    border-radius: .5rem;
+  }
+  .PoliticianData {
+    border-radius: .5rem;
+    background-color: orange;
+    padding: 2rem;
+    margin: 1rem;
+  }
+  .PoliticianImg{
+    border-radius: .1rem;
+    height: 30rem;
+    overflow: hidden;
+    object-fit: cover;
+    width: 28rem;
+  }
+  .CreatedPoliticianCardInfoContainer {
+    margin-top: 1rem;
+    font-size: var(--h4);
+    font-family: "Roboto";
+  }
+  .networthPolitician {
+    font-style: italic;
+    font-weight: bolder;
+  }
 </style>

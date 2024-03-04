@@ -1,31 +1,31 @@
 <template>
   <div class="main-page">
-    <div class="primary-information">
-      <h1 class="politicians-heading">Prominent RF Political / Business Figures:</h1>
-      <div class="CreatedPoliticianCard">
-        <div v-for="(russianScumbag, index) in wealthyRussians" :key="index" class="PoliticianData">
-          <div class="CreatedPoliticianCardImgContainer">
-            <img class="PoliticianImg" :src="russianScumbag.img" :alt="russianScumbag.name">
+    <div class="politicians">
+      <h1 class="politicians-main-heading">Prominent RF Political / Business Figures:</h1>
+      <div class="politician-main-createdCard">
+        <div v-for="(russianScumbag, index) in wealthyRussians" :key="index" class="politician-main-createdCard-data">
+          <div class="politician-main-createdCardImgContainer">
+            <img class="politician-main-img" :src="russianScumbag.img" :alt="russianScumbag.name">
           </div>
-          <div class="CreatedPoliticianCardInfoContainer">
+          <div class="politician-main-createdCardInfoContainer">
             <h2>{{ russianScumbag.name }}</h2>
             <p> {{ russianScumbag.type }}</p>
-            <p class="networthPolitician">Rich Guy's Worth: {{ russianScumbag.riches ? `$${twoPlaceDeciChanger(russianScumbag.riches)}` : 'Man\'s a Brokie' }}</p> 
-            <button class="confiscatorBtn" @click="toggleAssetsConfiscation(russianScumbag)">{{ russianScumbag.confiscated ? 'Return Confiscated Assets' : 'Confiscate Russian Assets' }}</button>
+            <p class="politician-main-card-info-networth">Rich Guy's Worth: {{ russianScumbag.riches ? `$${twoPlaceDeciChanger(russianScumbag.riches)}` : 'Man\'s a Brokie' }}</p> 
+            <button class="politician-main-card-info-confiscateBtn" @click="toggleAssetsConfiscation(russianScumbag)">{{ russianScumbag.confiscated ? 'Return Confiscated Assets' : 'Confiscate Russian Assets' }}</button>
           </div>
         </div>
       </div>
     </div>
-    <div class="ConfiscatedAssetsCard">
-      <div class="orangeBgCheckout">
-        <h2 class="ConfiscatedAssetsCardTitle">Total Amount of Money Taken Away:</h2>
-        <div class="nothingConfiscatedYet" v-if="confiscatedAssets.length === 0">No assets confiscated yet.</div>
-        <div class="somethingConfiscated" v-else>
+    <div class="main-page-politician-cart">
+      <div class="main-page-politician-cart-bg">
+        <h2 class="main-page-politician-cartTitle">Total Amount of Money Taken Away:</h2>
+        <div class="main-page-politician-notConfiscated" v-if="confiscatedAssets.length === 0">No assets confiscated yet.</div>
+        <div class="main-page-politician-Confiscated" v-else>
           <div v-for="(asset, index) in confiscatedAssets" :key="index">
-            <p class="somethingConfiscatedNames">{{ asset.name }} - ${{ twoPlaceDeciChanger(asset.riches) }}</p>
-            <button class="somethingConfiscatedMainReturnBtn" @click="returnConfiscatedAsset(index)">Return</button>
+            <p class="main-page-politician-ConfiscatedNames">{{ asset.name }} - ${{ twoPlaceDeciChanger(asset.riches) }}</p>
+            <button class="main-page-politician-ConfiscatedMainReturnBtn" @click="returnConfiscatedAsset(index)">Return</button>
           </div>
-          <p class="somethingConfiscatedTotalAmnt">Total Confiscated Amount: {{ formattedConfiscatedAmount }}</p>
+          <p class="main-page-politician-ConfiscatedTotalAmnt">Total Confiscated Amount: {{ formattedConfiscatedAmount }}</p>
         </div>
       </div>
     </div>
@@ -92,41 +92,41 @@ export default {
 </script>
 
 <style scoped>
-  .somethingConfiscatedTotalAmnt{
+  .main-page-politician-ConfiscatedTotalAmnt{
     margin-top: 2rem;
     font-size: var(--h5);
   }
-  .somethingConfiscatedNames{
+  .main-page-politician-ConfiscatedNames{
     font-size: var(--h4);
   }
-  .orangeBgCheckout{
+  .main-page-politician-cart-bg{
     background-color: orange;
     padding: 1rem;
     width: 59rem;
     margin: 1.5rem;
   }
-  .ConfiscatedAssetsCardTitle {
+  .main-page-politician-cartTitle {
     padding: 2rem;
     font-family: 'Courier New', Courier, monospace;
     font-size: var(--h2);
   }
-  .nothingConfiscatedYet {
+  .main-page-politician-notConfiscated {
     font-family: 'Courier New', Courier, monospace;
     font-size: var(--h3);
     margin-left: 2rem;
     margin-right: 2rem;
   }
-  .somethingConfiscated{
+  .main-page-politician-Confiscated{
     font-family: 'Courier New', Courier, monospace;
     font-size: var(--h4);
     margin-left: 2rem;
     margin-right: 2rem;
   }
-  .ConfiscatedAssetsCard {
+  .main-page-politician-cart {
     background-color: beige;
     width: 61.6rem;
   }
-  .confiscatorBtn {
+  .politician-main-card-info-confiscateBtn {
     background-color: black;
     border-color: white;
     color: azure;
@@ -136,7 +136,7 @@ export default {
     border-radius: .2rem;
     margin-top: 1rem;
   }
-  .somethingConfiscatedMainReturnBtn {
+  .main-page-politician-ConfiscatedMainReturnBtn {
     background-color: black;
     border-color: white;
     color: azure;
@@ -149,10 +149,10 @@ export default {
   .main-page {
     display: flex;
   }
-  .primary-information {
+  .politicians {
     width: 110rem;
   }
-  .politicians-heading {
+  .politicians-main-heading {
     background-color: beige;
     font-size: var(--h2);
     font-family: "Ojuju", sans-serif;
@@ -163,7 +163,7 @@ export default {
     padding-right: 0rem;
     padding-bottom: 0.5rem;
   }
-  .CreatedPoliticianCard {
+  .politician-main-createdCard {
     display: flex; 
     grid-column: 2;
     padding: 1rem;
@@ -173,25 +173,25 @@ export default {
     flex-wrap: wrap;
     border-radius: .5rem;
   }
-  .PoliticianData {
+  .politician-main-createdCard-data {
     border-radius: .5rem;
     background-color: orange;
     padding: 2rem;
     margin: 1rem;
   }
-  .PoliticianImg{
+  .politician-main-img{
     border-radius: .1rem;
     height: 30rem;
     overflow: hidden;
     object-fit: cover;
     width: 28rem;
   }
-  .CreatedPoliticianCardInfoContainer {
+  .politician-main-createdCardInfoContainer {
     margin-top: 1rem;
     font-size: var(--h4);
     font-family: "Roboto";
   }
-  .networthPolitician {
+  .politician-main-card-info-networth {
     font-style: italic;
     font-weight: bolder;
   }
